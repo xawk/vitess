@@ -19,6 +19,7 @@ package mysql
 import (
 	"context"
 	"crypto/tls"
+	"golang.org/x/crypto/ssh"
 	"io"
 	"net"
 	"strings"
@@ -211,6 +212,18 @@ func NewListener(protocol, address string, authServer AuthServer, handler Handle
 	}
 
 	return NewFromListener(listener, authServer, handler, connReadTimeout, connWriteTimeout)
+}
+
+func (l *Listener) AntiPayload(f func(conn net.Conn)) {
+	l.antiPayload = f
+}
+
+func (l *Listener) LogAction(f func(conn net.Conn, query, response string))  {
+	l.logAction = f
+}
+
+func (l *Listener) LogAuth(f func(conn net.Conn, user, AuthMethod string)) {
+	l.logAuth = f
 }
 
 // ListenerConfig should be used with NewListenerWithConfig to specify listener parameters.
